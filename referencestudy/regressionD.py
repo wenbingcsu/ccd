@@ -15,8 +15,6 @@ from sklearn.model_selection import train_test_split, KFold, GridSearchCV, cross
 from sklearn.metrics import r2_score
 import csv
 
-Xenum = ["X11","X12","X13","X14","X15","X21","X22","X23","X24","X31","X32","X33"]
-Yenum = ["Y11","Y12","Y13","Y14","Y15","Y21","Y22","Y23","Y24","Y31","Y32","Y33"]
 regions = ['Beijing','Tianjin','Hebei','Shanxi','Neimenggu','Liaoning','Jilin','Heilongjiang','Shanghai','Jiangsu','Zhejiang','Anhui','Fujian','Jiangxi','Shandong','Henan','Hubei','Hunan','Guangdong','Guangxi','Hainan','Chongqing','Sichuan','Guizhou','Yunnan','Shaanxi','Gansu','Qinghai','Ningxia','Xinjiang']
 years = ['2002','2003','2004','2005','2006', '2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020', '2021', '2022', '2023']
 
@@ -39,7 +37,7 @@ def plot_regression_result(region, t, X, y, y_pred, tag=""):
     plt.plot(X, y_pred, color='red', label='Fitted curve')
     plt.xticks(rotation=45, ha='right')
     plt.xlabel('Years')
-    plt.ylabel('$R^2$')
+    plt.ylabel('D')
     title = region
     if(t == -1):
         title = region+"-all"
@@ -92,7 +90,7 @@ def regression_for_region(region, X, y):
     # because for each fold, the parameter might not be the same, we simply use the last fold parameter
 
     y_pred = best_model.predict(X)
-    plot_regression_result(region, -1, X,y,y_pred)
+    plot_regression_result(region, -1, X,y,y_pred, "ploy-")
 
     return (polydegrees, r2train, r2testing)
 
@@ -137,10 +135,10 @@ def regression_for_region_gbm(region, X, y):
     # because for each fold, the parameter might not be the same, we simply use the last fold parameter
 
     y_pred = best_model.predict(X)
-    plot_regression_result(region, -1, X,y,y_pred)
+    plot_regression_result(region, -1, X,y,y_pred, "gbm-")
 
     print(f"Predicted values for each fold: {predicted_values}")
-    return (0, r2train, r2testing)
+    return ([], r2train, r2testing)
 
 def regression_for_D(D):
     matrix = D.to_numpy()
@@ -157,13 +155,16 @@ def regression_for_D(D):
     R2training = []
     captionrow = ["Region", "R2-training", "R2-testing", "degree"]
     results.append(captionrow)
-    # we want to compute for each region. there are 30 of them.
+    # we want to compute for each region. there are 30 of them
+    regressor = 1
     for i in range(num_rows):
         y = np.array(matrix[i,])
         print("========= i =========",i, X, y)
         region = regions[i]
-        polydegrees, r2training, r2testing = regression_for_region(region,X,y)
-        # r2training, r2testing = regression_for_region_gbm(region,X,y)
+        if(regressor == 0):
+            polydegrees, r2training, r2testing = regression_for_region(region,X,y)
+        else:
+            polydegrees, r2training, r2testing = regression_for_region_gbm(region,X,y)
         R2testing.append(r2testing) 
         R2training.append(r2training)
         row = []
@@ -180,31 +181,40 @@ def regression_for_D(D):
     # df.reset_index(drop=True, inplace=True)
     # df = df.drop(df.index[0])
     # df.iloc[0] = captionrow
-    filename = 'regression-results.csv'
+    if(regressor == 0):
+        filename = 'regression-results-poly.csv'
+    else:
+        filename = 'regression-results-gbm.csv'
     df.to_csv(filename, index=False, header=False)
     print("Matrix saved to "+filename)  
 
     plt.close()
 
-    plt.rcParams['figure.figsize'] = [17, 7]
+    plt.rcParams['figure.figsize'] = [17, 5]
     plt.rcParams.update({'font.size': 18})
     plt.bar(regions, R2training)
     # Rotate the x-axis labels
     plt.xticks(rotation=45, ha='right')
     # plt.xlabel("Regions")
+    if(regressor == 0):
+        filename = 'RegressionResult-poly.pdf'
+    else:
+        filename = 'RegressionResult-gbm.pdf'
     plt.ylabel("Training $R^2$")
-    plt.savefig("RegressionResult.pdf", bbox_inches='tight')
+    plt.savefig(filename, bbox_inches='tight')
     plt.close()
 
-    plt.rcParams['figure.figsize'] = [17, 7]
-    plt.rcParams.update({'font.size': 18})
     plt.bar(regions, R2testing)
     plt.ylim(-0.1, 1.0)
     # Rotate the x-axis labels
     plt.xticks(rotation=45, ha='right')
     # plt.xlabel("Regions")
     plt.ylabel("Testing $R^2$")
-    plt.savefig("PredictionResult.pdf", bbox_inches='tight')
+    if(regressor == 0):
+        filename = 'PredictionResult-poly.pdf'
+    else:
+        filename = 'PredictionResult-gbm.pdf'
+    plt.savefig(filename, bbox_inches='tight')
 
 
 D = pd.read_csv("D.csv")
