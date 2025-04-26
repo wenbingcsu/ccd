@@ -37,7 +37,7 @@ def plot_regression_result(region, t, X, y, y_pred, tag=""):
     plt.plot(X, y_pred, color='red', label='Fitted curve')
     plt.xticks(rotation=45, ha='right')
     plt.xlabel('Years')
-    plt.ylabel('$R^2$')
+    plt.ylabel('D')
     title = region
     if(t == -1):
         title = region+"-all"
@@ -90,7 +90,7 @@ def regression_for_region(region, X, y):
     # because for each fold, the parameter might not be the same, we simply use the last fold parameter
 
     y_pred = best_model.predict(X)
-    plot_regression_result(region, -1, X,y,y_pred)
+    plot_regression_result(region, -1, X,y,y_pred, "ploy-")
 
     return (polydegrees, r2train, r2testing)
 
@@ -135,7 +135,7 @@ def regression_for_region_gbm(region, X, y):
     # because for each fold, the parameter might not be the same, we simply use the last fold parameter
 
     y_pred = best_model.predict(X)
-    plot_regression_result(region, -1, X,y,y_pred)
+    plot_regression_result(region, -1, X,y,y_pred, "gbm-")
 
     print(f"Predicted values for each fold: {predicted_values}")
     return ([], r2train, r2testing)
@@ -156,7 +156,7 @@ def regression_for_D(D):
     captionrow = ["Region", "R2-training", "R2-testing", "degree"]
     results.append(captionrow)
     # we want to compute for each region. there are 30 of them
-    regressor = 0
+    regressor = 1
     for i in range(num_rows):
         y = np.array(matrix[i,])
         print("========= i =========",i, X, y)
