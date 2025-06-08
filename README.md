@@ -12,3 +12,8 @@ plotC.py: plot the coupling degree
 plotD.py: plot the coordination degree
 plotU.py: plot the comprehensive evaluation index
 regressionD.py: train the regression model using data from 2002-2018, test the model using data from 2019-2023 for projection. Also plot the regression error R^2. 
+
+To use our datasets and our code, please cite the following paper:
+Zhou, J.; Jia, Y.; Yang, Y.; Zhao, W. Coordinated Evaluation of Technological Innovation and Financial Development in China: An Engineering Perspective. Appl. Syst. Innov. 2025, 8, 77. https://doi.org/10.3390/asi8030077
+https://www.mdpi.com/2571-5577/8/3/77
+
